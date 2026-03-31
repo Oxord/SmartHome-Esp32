@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Умный дом - ESP32</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Управление умным домом</h1>
+
+        <div class="info-bar">
+            <div>🌐 IP адрес: <span class="ip-address" id="ipAddress">--</span></div>
+            <div>📶 Статус: <span id="wifiStatus">--</span></div>
+            <div>❄️ Порог температуры: 27°C</div>
+        </div>
+
+        <div class="grid">
+            <!-- Датчики -->
+            <div class="card">
+                <h2>🌡 Датчики</h2>
+                <div class="sensor-value" id="temperature">--<span class="sensor-unit">°C</span></div>
+                <div style="text-align: center;">Температура</div>
+                <div class="sensor-value" id="humidity">--<span class="sensor-unit">%</span></div>
+                <div style="text-align: center;">Влажность воздуха</div>
+                <div class="sensor-value" id="soil">--<span class="sensor-unit">%</span></div>
+                <div style="text-align: center;">Влажность почвы</div>
+            </div>
+            <!-- Окно -->
+            <div class="card">
+                <h2>🪟 Умное окно</h2>
+                <div class="window-status" id="windowStatus">--</div>
+                <div class="sensor-value" id="windowAngle">--°</div>
+                <div style="text-align: center;">Текущий угол</div>
+                <button class="button" onclick="controlWindow('open')">Открыть окно</button>
+                <button class="button off" onclick="controlWindow('close')">Закрыть окно</button>
+            </div>
+
+            <!-- Управление LED -->
+            <div class="card">
+                <h2>💡 Управление светом</h2>
+                <button class="button" id="ledOn" onclick="controlLED('on')">Включить LED</button>
+                <button class="button off" id="ledOff" onclick="controlLED('off')">Выключить LED</button>
+                <div class="status" id="ledStatus">LED выключен</div>
+                <div class="button-info">
+                    <i>🔘 Кнопка на GPIO 16:</i> вкл/выкл LED
+                </div>
+            </div>
+
+            <!-- Управление вентилятором -->
+            <div class="card">
+                <h2>🌀 Управление вентилятором</h2>
+                <button class="button" id="fanOn" onclick="controlFan('on')">Включить</button>
+                <button class="button off" id="fanOff" onclick="controlFan('off')">Выключить</button>
+                <div class="slider-container">
+                    <input type="range" min="0" max="255" value="0" class="slider" id="fanSpeed" oninput="updateFanSpeed(this.value)" onchange="setFanSpeed(this.value)">
+                    <div class="speed-value">Скорость: <span id="speedDisplay">0</span>%</div>
+                </div>
+                <div class="button-info">
+                    <i>🔘 Кнопка на GPIO 27:</i> увеличить скорость
+                </div>
+            </div>
+            <!-- DJ Panel -->
+            <div class="card" style="grid-column: 1 / -1;">
+                <h2>🎵 DJ Пульт</h2>
+
+                <!-- Пианино -->
+                <div class="piano">
+                    <div class="piano-key white" onmousedown="playNote(262)" onmouseup="stopNote()">C</div>
+                    <div class="piano-key black" onmousedown="playNote(277)" onmouseup="stopNote()">C#</div>
+                    <div class="piano-key white" onmousedown="playNote(294)" onmouseup="stopNote()">D</div>
+                    <div class="piano-key black" onmousedown="playNote(311)" onmouseup="stopNote()">D#</div>
+                    <div class="piano-key white" onmousedown="playNote(330)" onmouseup="stopNote()">E</div>
+                    <div class="piano-key white" onmousedown="playNote(349)" onmouseup="stopNote()">F</div>
+                    <div class="piano-key black" onmousedown="playNote(370)" onmouseup="stopNote()">F#</div>
+                    <div class="piano-key white" onmousedown="playNote(392)" onmouseup="stopNote()">G</div>
+                    <div class="piano-key black" onmousedown="playNote(415)" onmouseup="stopNote()">G#</div>
+                    <div class="piano-key white" onmousedown="playNote(440)" onmouseup="stopNote()">A</div>
+                    <div class="piano-key black" onmousedown="playNote(466)" onmouseup="stopNote()">A#</div>
+                    <div class="piano-key white" onmousedown="playNote(494)" onmouseup="stopNote()">B</div>
+                    <div class="piano-key white" onmousedown="playNote(523)" onmouseup="stopNote()">C5</div>
+                </div>
+
+                <!-- Мелодии -->
+                <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                    <button class="button" onclick="playMelody(0)" style="flex:1; min-width:120px;">🍄 Mario</button>
+                    <button class="button" onclick="playMelody(1)" style="flex:1; min-width:120px;">⚔️ Imperial March</button>
+                    <button class="button" onclick="playMelody(2)" style="flex:1; min-width:120px;">📱 Nokia</button>
+                    <button class="button off" onclick="djStop()" style="flex:1; min-width:120px;">⏹ Стоп</button>
+                </div>
+
+                <!-- Темп -->
+                <div class="slider-container">
+                    <input type="range" min="40" max="300" value="120" class="slider" id="tempoSlider" oninput="updateTempoDisplay(this.value)" onchange="setTempo(this.value)">
+                    <div class="speed-value">Темп: <span id="tempoDisplay">120</span> BPM</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопка обновления -->
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="button" onclick="refreshData()" style="width: auto; padding: 12px 40px;">🔄 Обновить данные</button>
+        </div>
+
+        <div class="footer">
+            ESP32 умный дом | Окно управляется автоматически
+        </div>
+    </div>
+    <script src="/app.js"></script>
+</body>
+</html>

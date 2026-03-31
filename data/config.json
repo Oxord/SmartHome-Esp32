@@ -1,0 +1,11 @@
+{
+    "wifi_ssid": "Ivan",
+    "wifi_password": "1234567000",
+    "ap_ssid": "ESP32_SmartHome",
+    "ap_password": "12345678",
+    "temp_threshold": 27.0,
+    "fan_min_speed": 30,
+    "fan_speed_step": 50,
+    "window_open_angle": 90,
+    "window_closed_angle": 0
+}
